@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Alfa Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1><i class="fa-solid fa-lock"></i> Alfa Admin Panel</h1>
+            <div class="header-actions">
+                <button id="btn-settings" class="btn btn-secondary"><i class="fa-solid fa-gear"></i> Налаштування</button>
+            </div>
+        </header>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Налаштування GitHub API</h2>
+                <p>Для збереження змін на сайті необхідний GitHub Personal Access Token з правами <code>repo</code>.</p>
+                <div class="form-group">
+                    <label for="github-token">GitHub Token:</label>
+                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxx">
+                </div>
+                <div class="form-actions">
+                    <button id="btn-save-settings" class="btn btn-primary">Зберегти</button>
+                    <button id="btn-close-settings" class="btn btn-secondary">Закрити</button>
+                </div>
+            </div>
+        </div>
+
+        <main>
+            <div id="loading" class="hidden">
+                <i class="fa-solid fa-spinner fa-spin"></i> Завантаження...
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard" class="hidden">
+                <div class="toolbar">
+                    <button id="btn-add-product" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Додати товар</button>
+                    <button id="btn-refresh" class="btn btn-secondary"><i class="fa-solid fa-rotate-right"></i> Оновити</button>
+                    <span id="repo-status" class="status-badge status-ok">Підключено до lavandaaudit/alfa_4</span>
+                </div>
+
+                <div class="product-list-container">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>Фото</th>
+                                <th>Назва</th>
+                                <th>Категорія</th>
+                                <th>Ціна від</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-list">
+                            <!-- Products will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Product Editor -->
+            <div id="product-editor" class="hidden">
+                <div class="editor-header">
+                    <h2 id="editor-title">Редагування товару</h2>
+                    <button id="btn-back" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Назад</button>
+                </div>
+                
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="product-name">Назва:</label>
+                                <input type="text" id="product-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-category">Категорія:</label>
+                                <input type="text" id="product-category" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-subcategory">Підкатегорія:</label>
+                                <input type="text" id="product-subcategory">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-description">Опис:</label>
+                                <textarea id="product-description" rows="4"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-base-price">Базова ціна (€):</label>
+                                <input type="number" id="product-base-price" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-min-qty">Мін. замовлення (шт):</label>
+                                <input type="number" id="product-min-qty" value="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="product-lead-time">Час виробництва (днів):</label>
+                                <input type="number" id="product-lead-time" value="7">
+                            </div>
+                        </div>
+                        
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label>Тиражі та ціни:</label>
+                                <div id="tiers-container">
+                                    <!-- Tiers will be rendered here -->
+                                </div>
+                                <button type="button" id="btn-add-tier" class="btn btn-secondary btn-sm mt-2"><i class="fa-solid fa-plus"></i> Додати тираж</button>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <label for="product-image">URL головного фото:</label>
+                                <input type="url" id="product-image">
+                                <div class="image-preview mt-2" id="image-preview">
+                                    <span>Немає фото</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="product-colors">Кольори (через кому):</label>
+                                <input type="text" id="product-colors" placeholder="red, blue, black">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="editor-actions">
+                        <button type="submit" id="btn-save-product" class="btn btn-primary btn-large"><i class="fa-solid fa-floppy-disk"></i> Зберегти в пам'ять</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Unsaved Changes Panel -->
+            <div id="unsaved-changes-panel" class="unsaved-panel hidden">
+                <div class="unsaved-content">
+                    <i class="fa-solid fa-triangle-exclamation text-warning"></i>
+                    <span>Є незбережені зміни! Вони існують тільки в вашому браузері.</span>
+                </div>
+                <button id="btn-publish-changes" class="btn btn-success"><i class="fa-solid fa-cloud-arrow-up"></i> Опублікувати на сайт</button>
+            </div>
+
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
