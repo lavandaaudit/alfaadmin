@@ -92,7 +92,9 @@ async function loadData() {
         
         // Base64 decode (handle utf-8 properly)
         const content = decodeURIComponent(escape(atob(data.content)));
-        products = JSON.parse(content);
+        // Fix for Python pandas exporting NaN to JSON
+        const sanitizedContent = content.replace(/:\s*NaN/g, ': null');
+        products = JSON.parse(sanitizedContent);
         
         hasUnsavedChanges = false;
         updateUnsavedPanel();
